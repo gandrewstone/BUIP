@@ -145,7 +145,7 @@ This is the current list of submitted BUIPs.
 |XInv
 |Peter Tschipper
 |2016-07-30
-|draft
+|passed
 |-
 |[[023.mediawiki|BUIP023]]
 |Miner block creation latency optimization
@@ -162,7 +162,13 @@ This is the current list of submitted BUIPs.
 |[[025.mediawiki|BUIP025]]
 |BU "Bronze Sponsor" at Scaling Bitcoin, Milan, Italy
 |Andrew Clifford
-|2916-09-10
+|2016-09-10
+|passed crowdfunded
+|-
+|[[026.mediawiki|BUIP026]]
+|Bounties for Software Exploits
+|Tim Potter (sponsored by Andrew Clifford)
+|2017-03-29
 |passed
 |-
 |[[027.mediawiki|BUIP027]]
@@ -187,7 +193,7 @@ This is the current list of submitted BUIPs.
 |Website updates
 |Jerry Chan
 |2016-09-29
-|closed
+|passed
 |-
 |[[031.mediawiki|BUIP031]]
 |New Members for Election #2
@@ -301,61 +307,61 @@ This is the current list of submitted BUIPs.
 |Amend AoC to change membership period
 |Windowly
 |2017-03-18
-|draft
+|closed
 |-
 |[[050.mediawiki|BUIP050]]
 |Double yes with tie-break question
 |torusJKL
 |2017-03-18
-|draft
+|closed
 |-
 |[[051.mediawiki|BUIP051]]
 |Add CompactBlocks support
 |freetrader
 |2017-04-13
-|draft
+|passed
 |-
 |[[052.mediawiki|BUIP052]]
 |Set up dedicated Continuous Integration
 |freetrader
 |2017-04-15
-|draft
+|passed
 |-
 |[[053.mediawiki|BUIP053]]
 |Tweakable client DoS responses
 |freetrader
 |2017-05-01
-|draft
+|passed
 |-
 |[[054.mediawiki|BUIP054]]
 |Make AD optional and disabled by default
 |freetrader
 |2017-05-05
-|draft
+|closed
 |-
 |[[055.mediawiki|BUIP055]]
 |Increase the Block Size Limit at a Fixed Block Height
 |Peter Rizun
 |2017-05-10
-|draft
+|passed
 |-
 |[[056.mediawiki|BUIP056]]
 |Increase the Block Size Limit at a Support Threshold
 |Tomas van der Wansem (Sponsor: Zangelbert Bingledack)
 |2017-05-12
-|draft
+|passed
 |-
 |[[057.mediawiki|BUIP057]]
 |Add BIP 135 support (generalized BIP9 version bits)
 |Sancho Panza (Sponsor: Andrea Suisani)
 |2017-04-14
-|draft
+|passed
 |-
 |[[058.mediawiki|BUIP058]]
 |Dynamic checkpoints
 |freetrader
 |2017-05-19
-|draft
+|withdrawn
 |-
 |[[059.mediawiki|BUIP059]]
 |Make "sticky gate" optional (disabled by default)
@@ -368,4 +374,112 @@ This is the current list of submitted BUIPs.
 |Andrew Clifford (@solex)
 |2017-05-22
 | ---
+|-
+|[[061.mediawiki|BUIP061]]
+|Demonstration of Phase in Full Network Upgrade Activated by Miners
+|LIN Zheming
+|2017-06-13
+|draft
+|-
+|[[062.mediawiki|BUIP062]]
+|Funded Development, aka Devpool
+|Andrew Clifford (@solex)
+|2017-08-24
+|passed
+|-
+|[[063.mediawiki|BUIP063]]
+|Support Bitcoin Cash with an official implementation
+|Andrew Clifford (@solex)
+|2017-09-01
+|passed
+|-
+|[[064.mediawiki|BUIP064]]
+|Support Segwit2x with an official implementation
+|Andrew Clifford (@solex)
+|2017-09-01
+|rejected
+|-
+|[[065.mediawiki|BUIP065]]
+|Gigablock Testnet Initiative
+|Peter Rizun (@Peter R)
+|2017-08-28
+|passed
+|-
+|[[066.mediawiki|BUIP066]]
+|Ecosystem Outreach for Onchain Scaling, Part II
+|Andrew Clifford (@solex)
+|2017-09-02
+|passed
+|-
+|[[067.mediawiki|BUIP067]]
+|New Members for Election #7
+|Andrew Clifford (@solex)
+|2017-09-09
+| ---
+|-
+|[[068.mediawiki|BUIP068]]
+|The Future of Bitcoin 2 Conference
+|Antony Zegers (@Mengerian)
+|2017-11-01
+|draft
+|-
+|[[070.mediawiki|BUIP070]]
+|Support BitPay's new Bitcoin Cash address format in BUCash
+|Gal Buki (@torusJKL)
+|2017-11-08
+| ---
+|-
+|[[071.mediawiki|BUIP071]]
+|Make Bitcoin Cash the "Release" Version of Bitcoin Unlimited
+|Peter Rizun (@Peter R)
+|2017-11-13
+|draft
+|-
+|[[072.mediawiki|BUIP072]]
+|Partially re-weight BU's funds towards BCH
+|Peter Rizun (@Peter R)
+|2017-11-13
+|draft
+|-
+|[[073|BUIP073]]
+|Fully re-weight BU's funds towards BCH
+|@Norway
+|2017-11-13
+|draft
+|-
+|[[074|BUIP074]]
+|Sell the Bitcoin Gold portion of BU's funds for BCH
+|@Windowly
+|2017-11-16
+|draft
+|-
+|[[075|BUIP075]]
+|Counter BUIP of BUIP071
+|Gal Buki (@torusJKL)
+|2017-11-13
+|draft
+|-
+|[[076.mediawiki|BUIP076]]
+|Support Base32 address format in BUCash
+|Gal Buki (@torusJKL)
+|2017-11-17
+| ---
+|-
+|[[077.mediawiki|BUIP077]]
+|Enable representative tokens via OP_GROUP on Bitcoin Cash
+|Andrew Stone (@thezerg)
+|2017-11-19
+|draft
+|-
+|[[078.survey|BUIP078]]
+|Enable Binary Contracts in Bitcoin Cash via OP_DATASIGVERIFY
+|Andrew Stone (@thezerg)
+|2017-11-19
+|draft
+|-
+|[[079.survey|BUIP079]]
+|Publication of BUIP vote and election dates in advance
+|Gal Buki (@torusJKL)
+|2017-11-19
+|draft
 |}
