@@ -11,16 +11,10 @@ Draft version 0.0.1
 -------
 
 <pre>
-  BIP: xxxx
-  Layer: Peer Services
-  Title: Graphene Relay
-  Authors: George Bissias <gbiss@cs.umass.edu>, Brian Levine <levine@cs.umass.edu>
-  Comments-Summary: 
-  Comments-URI: https://github.com/xxxxx
-  Status: Draft
-  Type: Standards Track
+  BUIP093: Graphene Relay
+  Proposers: George Bissias <gbiss@cs.umass.edu>, Brian Levine <levine@cs.umass.edu>
   Created: 2018-07-26
-  License: PD
+  Status: Draft
 </pre>
 
 ==Abstract==
