@@ -160,6 +160,7 @@ The standard Bloom filter implementation does not always honor the false positiv
 <code>
 nDesiredSize = (unsigned int)(ceil(-1 / LN2SQUARED * nElements * log(nFPRate) / 8));
 </code>
+<br />
 <code>
 nHashFuncs = (unsigned int)max(MIN_N_HASH_FUNC, int(vData.size() * 8 / nElements * LN2));
 </code>
