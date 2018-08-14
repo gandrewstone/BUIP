@@ -221,10 +221,7 @@ The Graphene protocol requires that IBLT '' I' '', created by the receiver, be s
 
 
 ==Protocol Versioning==
-Graphene protocol version will be communicated using the existing VERSION message as specified [https://bitcoin.org/en/developer-reference#version Bitcoin Developer Reference]. The existing message will be augmented as follows.
-# A new <code>serviceMap</code> field will be added that contains version information for various network services. 
-# <code>serviceMap</code> is of type <nowiki>vector<pair<std::string, uint64_t>></nowiki>.
-# Graphene-enabled nodes will add the entry "graphene":version_bits to <code>serviceMap</code> where <code>version_bits</code> indicate the latest supported version of Graphene.
+The Bitcoin P2P protocol has a message versioning facility and Graphene version should be included in that facility.
 
 ===Sample Version Implementation===
 
