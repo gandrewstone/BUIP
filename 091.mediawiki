@@ -167,7 +167,7 @@ The vAdditionalTxs field should include at least the coinbase transaction, since
  |-
  |is_modified||bool||1 byte||Standard||True if any items have been inserted into the IBLT
  |-
- |hashTable||<nowiki>vector<HashTableEntry></nowiki>||Standard||variable||Data cells for IBLT
+ |hashTable||<nowiki>vector<HashTableEntry></nowiki>||variable||Standard||Data cells for IBLT
  |}
 
 The Graphene protocol requires that IBLT '' I' '', created by the receiver, be subtracted from IBLT ''I'', originating from the sender. In order for this operation to succeed, it is critical that the IBLTs use the same quantity of hash functions, have the same number of cells, and that hash function ''i'' uses the same function and seed for both ''I'' and '' I' ''. Although the sender may use [https://github.com/umass-forensics/IBLT-optimization complex optimization techniques] to determine the number of cells and hash functions for ''I'', the receiver should simply copy those values provided that they are reasonably sized. The ''i''th hash function is the [http://code.google.com/p/smhasher/source/browse/trunk/MurmurHash3.cpp MurmurHash3] with seed ''i''.
