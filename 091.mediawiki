@@ -137,7 +137,7 @@ The vAdditionalTxs field should include at least the coinbase transaction, since
  |}
 
 ====CBloomFilter====
-''CBloomFilter'' is an implementation of a standard Bloom filter. It is used as part of the set reconciliation process in ''CGrapheneSet'' to filter out transactions from ''T'' that do not belong to the block.
+''CBloomFilter'' is Bitcoin's standard Bloom filter implementation with one adjustment, described below. It is used as part of the set reconciliation process in ''CGrapheneSet'' to filter out transactions from ''T'' that do not belong to the block.
 
 {|
  |'''Field Name'''||'''Type'''||'''Size'''||'''Purpose'''
@@ -154,6 +154,13 @@ The vAdditionalTxs field should include at least the coinbase transaction, since
  |-
  |nFlags||unsigned char||1 byte||Defines behavior for transaction insertion
  |}
+
+The standard Bloom filter implementation does not always honor the false positive rate (FPR) requested during initialization. This behavior is problematic for Graphene because the FPR determines the number of erroneous transactions removed from IBLT ''I'', which affects the decode rate for ''I''. For this reason, it is required that ''nDesiredSize'' and ''nHashFuncs'' be defined slightly differently than in the standard ''CBloomFilter'' implementation, as follows.
+
+<code>
+nDesiredSize = (unsigned int)(ceil(-1 / LN2SQUARED * nElements * log(nFPRate) / 8));
+nHashFuncs = (unsigned int)max(MIN_N_HASH_FUNC, int(vData.size() * 8 / nElements * LN2));
+</code>
 
 ====CIblt====
 ''CIblt'' is an IBLT implementation that is part of the ''CGrapheneSet'' reconciliation process. In the absence of a reconciliation failure, ''CIblt'' will generate false positive list ''F'' and missing transition cheap hashes ''M''.
