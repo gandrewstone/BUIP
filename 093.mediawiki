@@ -6,7 +6,7 @@
 
 '''This specification is still in the process of being written.'''
 
-Draft version 0.0.8
+Draft version 0.0.9
 
 -------
 
@@ -62,7 +62,7 @@ The intuition behind Graphene's use of Bloom filters and IBLTs is as follows, pr
 
 Let us consider several options for relaying a block. The first option is to simply list each 32-byte transaction ID.  If our block contains ''n=2000'' transactions, then the total cost is 64,000 bytes. Next, we realize that the chances of an accidental collision among 32-bytes IDs is almost nil, and so our second option is to limit each transaction ID to its first 8 bytes. If our block contains ''n=2000'' transactions, then the total cost is already down to 16,000 bytes. 
 
-Our third option is to use Bloom filters, which are an incredibly useful probabilistic data structure for determining whether ''items'' are members of a given  ''set''. In this case, our set is all transactions in the sender's block (actually, the set of transaction IDs); and the items are the transactions IDs in the receiver's mempool. A Bloom filter has two special characteristics. First, it has no ''false negatives''. That is, if a Bloom filter tells us that a transaction ID ''is not'' in the set, then it ''definitely is not'' in the set.  Second, a Bloom filters does have ''false positives''. That is, if a Bloom filter tells us that a transaction ID ''is'' in the set, then it ''might not be'' in the set. We can set the Bloom filter's false positive rate (FPR) to whatever we like. There is an important trade-off though: if the FPR is low, and the Bloom filter is therefore accurate, then it will also be larger in terms of bytes. If we don't mind some wrong answers about what transaction IDs are in the block, then the Bloom filter will be smaller. 
+Our third option is to use Bloom filters, which are an incredibly useful probabilistic data structure for determining whether ''items'' are members of a given ''set''. In this case, our set is all transactions in the sender's block (actually, the set of transaction IDs); and the items are the transactions IDs in the receiver's mempool. A Bloom filter has two special characteristics. First, it has no ''false negatives''. That is, if a Bloom filter tells us that a transaction ID ''is not'' in the set, then it ''definitely is not'' in the set.  Second, a Bloom filters does have ''false positives''. That is, if a Bloom filter tells us that a transaction ID ''is'' in the set, then it ''might not be'' in the set. We can set the Bloom filter's false positive rate (FPR) to whatever we like. There is an important trade-off though: if the FPR is low, and the Bloom filter is therefore accurate, then it will also be larger in terms of bytes. If we don't mind some wrong answers about what transaction IDs are in the block, then the Bloom filter will be smaller. 
 
 How much space is required to relay blocks using Bloom filters? For example, we could set the FPR of the Bloom Filter to ''f=1/m''. In that case, when the receiver checks each of the ''m'' transaction IDs in her mempoool, we can expect that the Bloom filter will wrongly state that ''f*m=(1/m)*m=1'' transaction is in the block on average. To make matters worse, we won't know which transaction is the wrong one; as a result of the extra transaction, the Merkle root won't validate. We can try to fix this problem by lowering the FPR of the filter. For example, if we set the FPR to ''f=1/(144m)'', then we can expect that the filter will permit a wrong answer only about once every 144 blocks relayed (i.e., only about once a day). But keep in mind, this accuracy will cost us in bytes. The size of a Bloom filter with ''n'' items inserted and a false positive rate of ''f=1/144m'' [https://en.wikipedia.org/wiki/Bloom_filter#Optimal_number_of_hash_functions is well known to be] 
 ''-n*ln(f)/ln<sup>2</sup>(2) = n*ln(1/(144m))/(8ln<sup>2</sup>(2))'' bytes. For example, for a block with ''n=2000'' transactions and a mempool of ''m=6000'' transactions total, the Bloom filter will be about 7,113 bytes. That's an improvement over our first and second options, but we can do better. 
@@ -230,24 +230,24 @@ The Bitcoin P2P protocol has a message versioning facility and Graphene version 
 ==Recovery==
 Graphene uses IBLTs, which are a probabilistic data structure that have a tunable but non-zero failure rate during normal operation. The IBLT used in Graphene should be tuned to fail once every 240 blocks relayed or fewer for all sizes of IBLT used. 
 
-Upon failure, a fall-back option must be used. Currently, the only option is to fall back to a full block or an XTreme Thin (XThin) Block if that protocol is also enabled. Future versions of this specification will specify a more efficient in-protocol recovery mechanism . 
+Upon failure, a fall-back option must be used. Currently, the only option is to fall back to a full block or an XTreme Thin (XThin) Block if that protocol is also enabled. Future versions of this specification will specify a more efficient in-protocol recovery mechanism. 
 
 ===Selecting parameters for the Bloom Filter and IBLT===
 Graphene is efficient when the parameters of the Bloom Filter and IBLT are set correctly by the sender. Here we present two methods of setting these parameters. Any method for parameterizing the Bloom Filter and IBLT can be selected by the sender, but it is possible discover the optimal choice resulting in the smallest possible serialized Graphene block. The first method is simpler to implement, but it also less efficient and will result in a slightly lower decode rate than desired.
 
-1. Let ''m'' be the size of the receiver's mempool, and let ''n'' be the number of transactions in the block. Let ''t'' be the average size in bytes per item required to recover ''a'' items from the IBLT (i.e., total IBLT table size in bytes divided by ''a''). For example, in our implementation, t=15 bytes approximately. Then the IBLT should be parameterized to recover ''a=n/(ct)'' items, where ''c=8ln<sup>2</sup>(2)''.  The Bloom filter should be set to have a false positive rate (FPR) of ''f=a/(m-n)''. The derivation of these values is presented in the Appendix of this specification. 
+1. Let ''m'' be the size of the receiver's mempool, and let ''n'' be the number of transactions in the block. Let ''t'' be the average size in bytes per item required to recover ''a'' items from the IBLT (i.e., total IBLT table size in bytes divided by ''a''). For example, in our implementation, t=17 bytes, approximately. Then the IBLT should be parameterized to recover ''a=n/(ct)'' items, where ''c=8ln<sup>2</sup>(2)''.  The Bloom filter should be set to have a false positive rate (FPR) of ''f=a/(m-n)''. The derivation of these values is presented in the Appendix of this specification. 
 
 2. The sizes of the Bloom filter and IBLT can be significantly smaller if a (brute force) linear search is used to parameterize the two data structures.  Simply put, for each integer value of ''a'' from 1 to m: (1)  determine  the  size of the IBLT from its actual implementation, taking into account serialization costs; (2) determine the size in bytes of the Bloom filter for a false positive rate of ''f=a/(m-n)'' when ''n'' items  are inserted from its implementation. The value of ''a'' that has the minimum sum cost in bytes is selected. 
 
-We also note that the IBLT decode rate varies with the number of recovered items ''a''. In order to ensure a consistent decode rate (1 out of 240 blocks for example), it is necessary to modify the number of hash functions and overhead used when constructing the IBLT. This, in turn, changes the value of ''t'', which affects the accuracy of method 1 above. Determining the combination of hash function quantity and overhead that yields the smallest IBLT for a given decode rate is an orthogonal optimization problem. We have released a stand-alone implementation of [https://github.com/umass-forensics/IBLT-optimization IBLTs in C++] (with a Python wrapper) and a script to determine such values. 
+We also note that the IBLT decode rate varies with the number of recovered items ''a''. In order to ensure a consistent decode rate (1 out of 240 blocks, for example), it is necessary to modify the number of hash functions and overhead used when constructing the IBLT. This, in turn, changes the value of ''t'', which affects the accuracy of method 1 above. Determining the combination of hash function quantity and overhead that yields the smallest IBLT for a given decode rate is an orthogonal optimization problem. We have released a stand-alone implementation of [https://github.com/umass-forensics/IBLT-optimization IBLTs in C++] (with a Python wrapper) and a script to determine such values. 
 
 
 ====Protocol design====
 A simple comparison of Graphene to related work is as follows. A block holds ''n=2000'' transactions, which the receiver holds in its mempool along with 4000 other transactions; in other words ''m=2000+4000=6000''.
 
-Using Graphene, the sender sends an INV, and the receiver responds with a '''get_grblk''' message, which includes the value ''m''. The sender computes that an IBLT that can recover ''a=27'' items and a Bloom filter of ''n'' items with a FPR of ''f=a/(m-n)=27/(6000-2000)=0.00675'' is minimal. In our test implementation, this results in 3,244 byte total based a 643-byte IBLT and a 2601-byte Bloom filter. Without a canonical transaction order, an expression of the transaction ordering must also be sent, increasing the total by 2,750 bytes to 5,994 bytes. (The receiver's IBLT is not sent over the network.)  
+Using Graphene, the sender sends an INV, and the receiver responds with a '''get_grblk''' message, which includes the value ''m''. The sender computes that an IBLT that can recover ''a=27'' items and a Bloom filter of ''n'' items with a FPR of ''f=a/(m-n)=27/(6000-2000)=0.00675'' is minimal. In our test implementation, this results in 3,244 bytes total, the sum of a 643-byte IBLT and a 2,601-byte Bloom filter. Without a canonical transaction order, an expression of the transaction ordering must also be sent, increasing the total by 2,750 bytes to 5,994 bytes. (The receiver's IBLT is not sent over the network.)  
 
-XTreme Thin Blocks [[093.mediawiki#ref5|<nowiki>[5</nowiki>]][[093.mediawiki#ref8|<nowiki>, 8</nowiki>]][[093.mediawiki#ref9|<nowiki>, 9]</nowiki>]] has the receiver start by sending a 3956-byte Bloom Filter of the mempool with an FPR of ''f=1/m=1/2000=0.0005'', and 8-bytes for each of the ''n=2000'' transactions. The total is therefore 3956+8*2000= 19,956.
+XTreme Thin Blocks [[093.mediawiki#ref5|<nowiki>[5</nowiki>]][[093.mediawiki#ref8|<nowiki>, 8</nowiki>]][[093.mediawiki#ref9|<nowiki>, 9]</nowiki>]] has the receiver start by sending a 3,956-byte Bloom Filter of the mempool with an FPR of ''f=1/m=1/2000=0.0005'', and 8-bytes for each of the ''n=2000'' transactions. The total is therefore 3956+8*2000= 19,956.
 
 Compact Blocks [[093.mediawiki#ref6|<nowiki>[6]</nowiki>]] would send over just the 8-bytes for each of the ''n=2000'' transactions, for a total of 8*2000= 16,000.
 
@@ -256,7 +256,7 @@ The above is a simplistic comparison, as the actual operation of all three proto
 The size of all these approaches grows linearly with block size, but Graphene grows more slowly. As the example shows, Graphene would benefit significantly from a standardized, canonical ordering of transactions in blocks, which has been proposed by others for separate benefits.
 
 ====Short transaction ID calculation====
-An 8-byte (64-bit) transaction ID results in a very low probability of collision. Let ''b'' be the size in bits of the shortened transaction IDs. The probability of collision in this "Birthday Attack" scenario is well-known to be approximated by ''1-exp(-m(m-1)/2**(b+1))''. For example, for a mempool of ''m=10,000,000'' transactions, the probability of collision using ''b=64'' bits is approximately 0.00000271050. 
+An 8-byte (64-bit) transaction ID results in a very low probability of collision. Let ''b'' be the size in bits of the shortened transaction IDs. The probability of collision in this "Birthday Attack" scenario is well-known to be approximated by ''1-exp(-m(m-1)/2**(b+1))''. For example, for a mempool of ''m=10,000,000'' transactions, the probability of collision using ''b=64'' bits is approximately 0.0000027. 
 
 ==Backward compatibility==
 Older clients remain fully compatible and interoperable after this change.
@@ -298,17 +298,17 @@ The values for the simple (but less efficient) method of minimizing Graphene's B
 
 ''T<sub>BF</sub> = -n ln(f) / (8 ln<sup>2</sup>(2))'' bytes.  
 
-Let ''T<sub>I</sub>'' be the size of the IBLT. If each item inserted is based on an 8-byte txn ID and 3-byte checksum, and it's typical that the size of the IBLT in bytes follows this relationship:
+Let ''T<sub>I</sub>'' be the size of the IBLT. If each item inserted is based on an 8-byte txn ID and 4-byte checksum, and it's typical that the size of the IBLT in bytes follows this relationship:
 
-''T<sub>I</sub> = (1.4a+20) * (8+3) =15.4a+220'' bytes.
+''T<sub>I</sub> = (1.4a+20) * (8+4) =16.8a+240'' bytes.
 
 Therefore, if we set ''f= a / (m-n)'', then total size of the Bloom filter and IBLT is 
 
-''T = T<sub>BF</sub> T<sub>I</sub> = -n ln(a/(m-n))/(8ln<sup>2</sup>(2)) + 15.4a + 220''. 
+''T = T<sub>BF</sub> T<sub>I</sub> = -n ln(a/(m-n))/(8ln<sup>2</sup>(2)) + 16.8a + 240''. 
 
 Taking the derivative of this equation with respect to ''a'', setting it to 0, and solving it for ''a'', we see that ''T'' is minimized when 
 
-''a=n/(8ln<sup>2</sup>(2)*15.4)''.
+''a=n/(8ln<sup>2</sup>(2)*16.8)''.
 
 
 ==Acknowledgments==
