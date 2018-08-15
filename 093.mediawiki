@@ -6,7 +6,7 @@
 
 '''This specification is still in the process of being written.'''
 
-Draft version 0.0.5
+Draft version 0.0.6
 
 -------
 
@@ -84,16 +84,16 @@ The '''get_grblk''' message (suggested implementation name: '''GET_GRAPHENE''') 
 The '''grblk''' message (suggested implementation name: '''GRAPHENEBLOCK''') transmits a single serialized '''CGrapheneBlock''' data structure. In the absence of failure or after successful recovery of items from set ''M'' (see above), the message contains sufficient information for the receiver to reconstruct the full block.
 
 ====get_grblktx====
-The '''get_grblktx''' (suggested implementation name: '''GET_GRAPHENETX''') message transmits a single serialized '''CRequestGrapheneBlockTx'''. This message is sent in the event that the IBLT subtraction operation succeeded and revealed a non-empty set of missing transaction IDs ''M'' (see figure below).
+The '''get_grblktx''' (suggested implementation name: '''GET_GRAPHENETX''') message transmits a single serialized '''CRequestGrapheneBlockTx'''. This message is sent in the event that the IBLT subtraction operation succeeded and revealed a non-empty set of missing transaction IDs ''M''.
 
 ====grblktx====
-The '''grblktx''' (suggested implementation name: '''GRAPHENETX''') message transmits a single serialized '''CGrapheneBlockTx'''. This message is sent in response to '''get_grblktx''' (see figure below); it contains full transactions corresponding to any cheap hashes in '''CRequestGrapheneBlockTx''' that also appear in the block.
+The '''grblktx''' (suggested implementation name: '''GRAPHENETX''') message transmits a single serialized '''CGrapheneBlockTx'''. This message is sent in response to '''get_grblktx'''; it contains full transactions corresponding to any cheap hashes in '''CRequestGrapheneBlockTx''' that also appear in the block.
 
 
 ===New data structures===
 Graphene introduces several new data structures to the network protocol: '''CMemPoolInfo''', '''CGrapheneBlock''', '''CIblt''' '''CGrapheneBlockTx''', and '''CRequestGrapheneBlockTx'''.
 
-All data structures use the standard bitcoin serialization format; some structures additionally use a compact size encoding, which we note in the tables below. Except for '''CGrapheneBlock''', the data structures are comprised of relatively simple c++ constructs, which we detail below. '''CGrapheneBlock''' contains '''CGrapheneSet''', which itself contains Bloom filter and IBLT data structures, denoted '''CBloomFilter''' and '''CIblt''', respectively.
+All data structures use the standard Bitcoin serialization format; some structures additionally use a compact size encoding, which we note in the tables below. Except for '''CGrapheneBlock''', the data structures are comprised of relatively simple c++ constructs, which we detail below. '''CGrapheneBlock''' contains '''CGrapheneSet''', which itself contains Bloom filter and IBLT data structures, denoted '''CBloomFilter''' and '''CIblt''', respectively.
 We describe each of these complex structures separately.
 
 ====CGrapheneBlock====
@@ -227,20 +227,15 @@ The Graphene protocol requires that IBLT '' I' '', created by the receiver, be s
 ==Protocol Versioning==
 The Bitcoin P2P protocol has a message versioning facility and Graphene version should be included in that facility.
 
-===Sample Version Implementation===
-
-==Implementation Notes==
-It is possible to maliciously construct an IBLT that will cause a simplistic IBLT implementation to loop forever while decoding. The IBLT implementation used must have a limit on the number of iterations that a given instance of an IBLT can be "peeled" before failure. 
-
 ==Recovery==
-Graphene uses IBLTs, which are a probabilistic data structure that has a tunable but non-zero failure rate during normal operation. The IBLT used in Graphene should be tuned to fail once every 240 blocks relayed or fewer for all sizes of IBLT used. 
+Graphene uses IBLTs, which are a probabilistic data structure that have a tunable but non-zero failure rate during normal operation. The IBLT used in Graphene should be tuned to fail once every 240 blocks relayed or fewer for all sizes of IBLT used. 
 
-Upon failure, a fall-back option must be used. Currently, the only option is to fall back to an XTreme Thin (XThin) Block. Future versions of this specification will specify a more efficient in-protocol recovery mechanism . 
+Upon failure, a fall-back option must be used. Currently, the only option is to fall back to a full block or an XTreme Thin (XThin) Block if that protocol is also enabled. Future versions of this specification will specify a more efficient in-protocol recovery mechanism . 
 
 ===Selecting parameters for the Bloom Filter and IBLT===
-Graphene is efficient when the parameters of the Bloom Filter and IBLT are set correctly by the sender. Here we present two methods of setting these parameters. Any method for parameterizing the Bloom Filter and IBLT can be selected by the sender, but it must be more efficient than simply sending the shortened transaction IDs. The first method is simpler to implement, but it also less efficient and will result in a slightly lower decode rate than desired.
+Graphene is efficient when the parameters of the Bloom Filter and IBLT are set correctly by the sender. Here we present two methods of setting these parameters. Any method for parameterizing the Bloom Filter and IBLT can be selected by the sender, but it is possible discover the optimal choice resulting in the smallest possible serialized Graphene block. The first method is simpler to implement, but it also less efficient and will result in a slightly lower decode rate than desired.
 
-1. Let ''m'' be the size of the receiver's mempool, and let ''n'' be the number of transactions in the block. Let ''t'' be the average size in bytes per item required  to recover ''a'' items from it (i.e., total IBLT table size in bytes divided by ''a''). For example, in our implementation, t=15 bytes approximately. Then the IBLT should be parameterized to recover ''a=n/(ct)'' items, where ''c=8ln<sup>2</sup>(2)''.  The Bloom filter should be set to have a false positive rate (FPR) of ''f=a/(m-n)''. The derivation of these values is presented in the Appendix of this specification. 
+1. Let ''m'' be the size of the receiver's mempool, and let ''n'' be the number of transactions in the block. Let ''t'' be the average size in bytes per item required to recover ''a'' items from the IBLT (i.e., total IBLT table size in bytes divided by ''a''). For example, in our implementation, t=15 bytes approximately. Then the IBLT should be parameterized to recover ''a=n/(ct)'' items, where ''c=8ln<sup>2</sup>(2)''.  The Bloom filter should be set to have a false positive rate (FPR) of ''f=a/(m-n)''. The derivation of these values is presented in the Appendix of this specification. 
 
 2. The sizes of the Bloom filter and IBLT can be significantly smaller if a (brute force) linear search is used to parameterize the two data structures.  Simply put, for each integer value of ''a'' from 1 to m: (1)  determine  the  size of the IBLT from its actual implementation, taking into account serialization costs; (2) determine the size in bytes of the Bloom filter for a false positive rate of ''f=a/(m-n)'' when ''n'' items  are inserted from its implementation. The value of ''a'' that has the minimum sum cost in bytes is selected. 
 
